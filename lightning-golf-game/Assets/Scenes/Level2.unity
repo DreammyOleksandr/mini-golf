@@ -1406,12 +1406,10 @@ MonoBehaviour:
   rb: {fileID: 1438300505}
   trajectoryLine: {fileID: 1438300502}
   stopVelocity: 0.2
-  shotPower: 40
+  shotPower: 50
   maxPower: 1
-  maxTrajectoryPoints: 50
-  minTrajectoryPoints: 10
-  trajectoryTimeStep: 0.1
-  maxTrajectoryTime: 3
+  trajectorySteps: 30
+  trajectoryStepSize: 0.1
   bouncePreventionMode: 1
 --- !u!54 &1438300505
 Rigidbody:
