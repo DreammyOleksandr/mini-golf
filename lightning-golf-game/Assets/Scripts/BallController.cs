@@ -1,4 +1,12 @@
 using UnityEngine;
+using Unity.Collections;
+using System.Linq;
+
+public enum PreventionMode 
+{ 
+    None, 
+    Simple 
+}
 
 public class BallController : MonoBehaviour
 {
@@ -17,6 +25,9 @@ public class BallController : MonoBehaviour
     public int minTrajectoryPoints = 3;
     public float trajectoryTimeStep = 0.1f;
     public float maxTrajectoryTime = 0.15f;
+    
+    [Header("Collision Prevention")]
+    public PreventionMode bouncePreventionMode = PreventionMode.Simple;
 
     private bool isAiming;
     private bool isIdle;
