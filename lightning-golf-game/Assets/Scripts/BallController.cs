@@ -21,10 +21,8 @@ public class BallController : MonoBehaviour
     public float maxPower;
     
     [Header("Trajectory Settings")]
-    public int maxTrajectoryPoints = 8;
-    public int minTrajectoryPoints = 3;
-    public float trajectoryTimeStep = 0.1f;
-    public float maxTrajectoryTime = 0.15f;
+    public int trajectorySteps = 30;
+    public float trajectoryStepSize = 0.1f;
     
     [Header("Collision Prevention")]
     public PreventionMode bouncePreventionMode = PreventionMode.Simple;
@@ -33,12 +31,13 @@ public class BallController : MonoBehaviour
     private bool isIdle;
     private bool isShooting;
     Vector3? worldPoint;
+
     void Awake()
     {
         mainCamera = Camera.main;
         rb.maxAngularVelocity = 1000;
         isAiming = false;
-        isIdle = true; // Initialize ball as idle so aiming can start
+        isIdle = true;
         
         if(trajectoryLine != null) {
             trajectoryLine.enabled = false;
@@ -52,13 +51,11 @@ public class BallController : MonoBehaviour
           if(Input.GetMouseButtonDown(0)){
             if(isIdle) {
               isAiming = true;
-              Debug.Log("Started aiming");
             }
           }
           if(Input.GetMouseButtonUp(0)){
             if(isAiming) {
               isShooting = true;
-              Debug.Log("Released mouse - shooting");
             }
           }
         }
@@ -96,10 +93,7 @@ public class BallController : MonoBehaviour
       }
       
       if(isAiming && trajectoryLine != null) {
-        Debug.Log("Showing trajectory");
         ShowTrajectory(worldPoint.Value);
-      } else if(isAiming && trajectoryLine == null) {
-        Debug.LogWarning("Trajectory line is null! Assign LineRenderer in inspector.");
       }
     }
 
@@ -108,10 +102,8 @@ public class BallController : MonoBehaviour
       Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 
       if(Physics.Raycast(ray, out RaycastHit hit)){
-        Debug.Log($"Raycast hit: {hit.point} on {hit.collider.name}");
         return hit.point;
       }
-      Debug.Log("Raycast missed - no hit detected");
       return null;
     }
 
@@ -133,64 +125,51 @@ public class BallController : MonoBehaviour
 
       Vector3 direction = (transform.position - horizontalWorldPoint).normalized;
 
-      float strength = Vector3.Distance(transform.position, horizontalWorldPoint);
-      rb.AddForce(direction * strength * shotPower);
+      float distance = Vector3.Distance(transform.position, horizontalWorldPoint);
+      float clampedDistance = Mathf.Min(distance, maxPower);
+      rb.AddForce(direction * clampedDistance * shotPower);
     }
-    
+
     private void ShowTrajectory(Vector3 targetPoint)
     {
-      Vector3 horizontalWorldPoint = new Vector3(targetPoint.x, transform.position.y, targetPoint.z);
-      Vector3 direction = (transform.position - horizontalWorldPoint).normalized;
-      float strength = Vector3.Distance(transform.position, horizontalWorldPoint);
+      if(trajectoryLine == null) return;
       
-      // Match the physics used in Shoot() method - AddForce applies impulse
-      Vector3 force = direction * strength * shotPower;
-      Vector3 velocity = force / rb.mass;
+      Vector3 horizontalTargetPoint = new Vector3(targetPoint.x, transform.position.y, targetPoint.z);
+      Vector3 direction = (transform.position - horizontalTargetPoint).normalized;
+      float distance = Vector3.Distance(transform.position, horizontalTargetPoint);
       
-      // Calculate dynamic trajectory length based on shot power
-      float powerRatio = Mathf.Clamp01(strength / maxPower);
-      int dynamicTrajectoryPoints = Mathf.RoundToInt(Mathf.Lerp(minTrajectoryPoints, maxTrajectoryPoints, powerRatio));
-      float dynamicTime = maxTrajectoryTime * Mathf.Sqrt(powerRatio); // Use sqrt for better scaling
-      float dynamicTimeStep = dynamicTime / dynamicTrajectoryPoints;
+      float clampedDistance = Mathf.Min(distance, maxPower);
+      Vector3 velocity = direction * clampedDistance * shotPower;
+      
+      Vector3[] trajectoryPoints = CalculateTrajectoryPoints(transform.position, velocity);
       
       trajectoryLine.enabled = true;
-      trajectoryLine.positionCount = dynamicTrajectoryPoints;
-      
-      // Create gradient for fade effect
-      Gradient gradient = new Gradient();
-      GradientColorKey[] colorKey = new GradientColorKey[2];
-      GradientAlphaKey[] alphaKey = new GradientAlphaKey[3];
-      
-      // Color stays the same (white or whatever color you want)
-      colorKey[0].color = Color.white;
-      colorKey[0].time = 0.0f;
-      colorKey[1].color = Color.white;
-      colorKey[1].time = 1.0f;
-      
-      // Alpha fades from full to transparent
-      alphaKey[0].alpha = 1.0f;
-      alphaKey[0].time = 0.0f;
-      alphaKey[1].alpha = 0.8f;
-      alphaKey[1].time = 0.7f;
-      alphaKey[2].alpha = 0.0f;
-      alphaKey[2].time = 1.0f;
-      
-      gradient.SetKeys(colorKey, alphaKey);
-      trajectoryLine.colorGradient = gradient;
-      
-      Vector3 startPosition = transform.position;
-      
-      for(int i = 0; i < dynamicTrajectoryPoints; i++) {
-        float time = i * dynamicTimeStep;
-        Vector3 point = startPosition + velocity * time + 0.5f * Physics.gravity * time * time;
-        trajectoryLine.SetPosition(i, point);
-      }
+      trajectoryLine.positionCount = trajectoryPoints.Length;
+      trajectoryLine.SetPositions(trajectoryPoints);
     }
-    
+
     private void HideTrajectory()
     {
       if(trajectoryLine != null) {
         trajectoryLine.enabled = false;
       }
+    }
+
+    private Vector3[] CalculateTrajectoryPoints(Vector3 startPosition, Vector3 velocity)
+    {
+      Vector3[] points = new Vector3[trajectorySteps];
+      Vector3 currentPos = startPosition;
+      Vector3 currentVel = velocity;
+      
+      points[0] = currentPos;
+      
+      for(int i = 1; i < trajectorySteps; i++)
+      {
+        currentPos += currentVel * trajectoryStepSize;
+        currentVel += Physics.gravity * trajectoryStepSize;
+        points[i] = currentPos;
+      }
+      
+      return points;
     }
 }
