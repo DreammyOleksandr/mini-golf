@@ -20,6 +20,14 @@ public class BallController : MonoBehaviour
     public float shotPower;
     public float maxPower;
     
+    [Header("Force Curve Settings")]
+    [Range(0.01f, 1.0f)]
+    public float minForceDistance = 0.1f;
+    [Range(0.1f, 1.0f)] 
+    public float forceDeadZone = 0.3f;
+    [Range(1.0f, 4.0f)]
+    public float forceCurveExponent = 2.0f;
+    
     [Header("Trajectory Settings")]
     public int trajectorySteps = 30;
     public float trajectoryStepSize = 0.1f;
@@ -126,8 +134,8 @@ public class BallController : MonoBehaviour
       Vector3 direction = (transform.position - horizontalWorldPoint).normalized;
 
       float distance = Vector3.Distance(transform.position, horizontalWorldPoint);
-      float clampedDistance = Mathf.Min(distance, maxPower);
-      rb.AddForce(direction * clampedDistance * shotPower);
+      float smoothForce = CalculateSmoothForce(distance);
+      rb.AddForce(direction * smoothForce * shotPower);
     }
 
     private void ShowTrajectory(Vector3 targetPoint)
@@ -138,8 +146,8 @@ public class BallController : MonoBehaviour
       Vector3 direction = (transform.position - horizontalTargetPoint).normalized;
       float distance = Vector3.Distance(transform.position, horizontalTargetPoint);
       
-      float clampedDistance = Mathf.Min(distance, maxPower);
-      Vector3 velocity = direction * clampedDistance * shotPower;
+      float smoothForce = CalculateSmoothForce(distance);
+      Vector3 velocity = direction * smoothForce * shotPower;
       
       Vector3[] trajectoryPoints = CalculateTrajectoryPoints(transform.position, velocity);
       
@@ -153,6 +161,23 @@ public class BallController : MonoBehaviour
       if(trajectoryLine != null) {
         trajectoryLine.enabled = false;
       }
+    }
+
+    private float CalculateSmoothForce(float distance)
+    {
+      if(distance <= forceDeadZone)
+      {
+        return minForceDistance;
+      }
+      
+      float effectiveDistance = distance - forceDeadZone;
+      float maxEffectiveDistance = maxPower - forceDeadZone;
+      float normalizedDistance = Mathf.Clamp01(effectiveDistance / maxEffectiveDistance);
+      
+      float curvedForce = Mathf.Pow(normalizedDistance, forceCurveExponent);
+      float finalForce = Mathf.Lerp(minForceDistance, maxPower, curvedForce);
+      
+      return finalForce;
     }
 
     private Vector3[] CalculateTrajectoryPoints(Vector3 startPosition, Vector3 velocity)
