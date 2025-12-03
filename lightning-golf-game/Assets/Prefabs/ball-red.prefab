@@ -54,7 +54,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 9e7ab580079ee40ac83c64478aea3e9a, type: 2}
     - target: {fileID: 919132149155446097, guid: 938011c18109a4f48b926092986a9016, type: 3}
       propertyPath: m_Name
-      value: ball-red 1
+      value: ball-red
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 938011c18109a4f48b926092986a9016, type: 3}
       propertyPath: m_TagString
@@ -129,6 +129,9 @@ MonoBehaviour:
   stopVelocity: 0.2
   shotPower: 50
   maxPower: 1
+  minForceDistance: 0.116
+  forceDeadZone: 0.144
+  forceCurveExponent: 2.673
   trajectorySteps: 30
   trajectoryStepSize: 0.1
   bouncePreventionMode: 1

@@ -136,6 +136,8 @@ public class BallController : MonoBehaviour
       float distance = Vector3.Distance(transform.position, horizontalWorldPoint);
       float smoothForce = CalculateSmoothForce(distance);
       rb.AddForce(direction * smoothForce * shotPower);
+      
+      ShotsCounter.Instance.IncrementShot();
     }
 
     private void ShowTrajectory(Vector3 targetPoint)
