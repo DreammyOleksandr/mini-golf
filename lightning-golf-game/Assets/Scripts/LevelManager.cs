@@ -10,7 +10,7 @@ public class LevelManager : MonoBehaviour
     public string nextLevelName = "";
     
     [Header("Debug")]
-    public bool showDebugInfo = false;
+    public bool showDebugInfo = true;
     
     private bool isLevelCompleting = false;
     
