@@ -5,7 +5,7 @@ public class HoleTrigger : MonoBehaviour
 {
     [Header("Settings")]
     public float requiredTimeInHole = 1f;
-    public string ballTag = "Ball";
+    public string ballTag = "Player";
     
     [Header("Debug")]
     public bool showDebugInfo = false;
