@@ -6,23 +6,20 @@ public class MainMenuController : MonoBehaviour
 {
     [Header("UI References")]
     public Button startGameButton;
+    public Button selectLevelButton;
     
     [Header("Scene Settings")]
     public string firstLevelName = "Level1";
+    public string levelSelectSceneName = "LevelSelect";
     
     [Header("Debug")]
     public bool showDebugInfo = true;
     
     void Awake()
     {
-        if (startGameButton == null)
+        if (startGameButton == null || selectLevelButton == null)
         {
-            startGameButton = GetComponent<Button>();
-        }
-        
-        if (startGameButton == null)
-        {
-            Debug.LogError("MainMenuController: No start game button assigned or found!");
+            Debug.LogError("MainMenuController: Missing button references!");
             enabled = false;
             return;
         }
@@ -31,6 +28,7 @@ public class MainMenuController : MonoBehaviour
     void Start()
     {
         startGameButton.onClick.AddListener(StartGame);
+        selectLevelButton.onClick.AddListener(SelectLevel);
         
         if (showDebugInfo)
         {
@@ -44,6 +42,10 @@ public class MainMenuController : MonoBehaviour
         {
             startGameButton.onClick.RemoveListener(StartGame);
         }
+        if (selectLevelButton != null)
+        {
+            selectLevelButton.onClick.RemoveListener(SelectLevel);
+        }
     }
     
     public void StartGame()
@@ -54,6 +56,16 @@ public class MainMenuController : MonoBehaviour
         }
         
         SceneManager.LoadScene(firstLevelName);
+    }
+    
+    public void SelectLevel()
+    {
+        if (showDebugInfo)
+        {
+            Debug.Log($"MainMenuController: Opening level select: {levelSelectSceneName}");
+        }
+        
+        SceneManager.LoadScene(levelSelectSceneName);
     }
     
     public void LoadScene(string sceneName)
