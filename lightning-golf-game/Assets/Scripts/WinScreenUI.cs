@@ -9,14 +9,9 @@ public class WinScreenUI : MonoBehaviour
     public GameObject winScreenPanel;
     public TextMeshProUGUI levelCompleteText;
     public TextMeshProUGUI shotsText;
-    public TextMeshProUGUI starRatingText;
     public Button mainMenuButton;
     public Button nextLevelButton;
     
-    [Header("Star Rating Settings")]
-    public int threeStar = 3;
-    public int twoStar = 5;
-    public int oneStar = 8;
     
     [Header("Scene Settings")]
     public string mainMenuSceneName = "MainMenu";
@@ -113,7 +108,6 @@ public class WinScreenUI : MonoBehaviour
         // Update UI elements
         UpdateLevelCompleteText();
         UpdateShotsText(shotCount);
-        UpdateStarRating(shotCount);
         
         // Show the win screen
         winScreenPanel.SetActive(true);
@@ -152,33 +146,6 @@ public class WinScreenUI : MonoBehaviour
         }
     }
     
-    private void UpdateStarRating(int shotCount)
-    {
-        if (starRatingText == null) return;
-        
-        string stars = GetStarRating(shotCount);
-        starRatingText.text = stars;
-    }
-    
-    private string GetStarRating(int shotCount)
-    {
-        if (shotCount <= threeStar)
-        {
-            return "★★★";
-        }
-        else if (shotCount <= twoStar)
-        {
-            return "★★☆";
-        }
-        else if (shotCount <= oneStar)
-        {
-            return "★☆☆";
-        }
-        else
-        {
-            return "☆☆☆";
-        }
-    }
     
     public void GoToMainMenu()
     {
