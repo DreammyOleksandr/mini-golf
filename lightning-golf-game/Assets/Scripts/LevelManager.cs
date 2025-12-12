@@ -6,7 +6,8 @@ public class LevelManager : MonoBehaviour
 {
     [Header("Level Settings")]
     public float levelCompleteDelay = 2f;
-    public bool autoLoadNextLevel = true;
+    public bool autoLoadNextLevel = false;
+    public bool useWinScreen = true;
     public string nextLevelName = "";
     
     [Header("Debug")]
@@ -50,7 +51,15 @@ public class LevelManager : MonoBehaviour
     {
         yield return new WaitForSeconds(levelCompleteDelay);
         
-        if (autoLoadNextLevel && !string.IsNullOrEmpty(nextLevelName))
+        if (useWinScreen)
+        {
+            if (showDebugInfo)
+            {
+                Debug.Log("Level complete! Win screen will be shown by WinScreenUI component.");
+            }
+            // Win screen is handled by WinScreenUI component automatically via HoleTrigger.OnLevelCompleted event
+        }
+        else if (autoLoadNextLevel && !string.IsNullOrEmpty(nextLevelName))
         {
             LoadNextLevel();
         }
