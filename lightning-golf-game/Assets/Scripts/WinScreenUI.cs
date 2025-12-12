@@ -21,12 +21,8 @@ public class WinScreenUI : MonoBehaviour
     [Header("Debug")]
     public bool showDebugInfo = true;
     
-    private string currentSceneName;
-    
     void Awake()
     {
-        currentSceneName = SceneManager.GetActiveScene().name;
-        
         if (autoDetectNextLevel && string.IsNullOrEmpty(nextLevelName))
         {
             AutoDetectNextLevel();
@@ -114,6 +110,7 @@ public class WinScreenUI : MonoBehaviour
         
         if (showDebugInfo)
         {
+            string currentSceneName = SceneManager.GetActiveScene().name;
             Debug.Log($"WinScreenUI: Showing win screen for {currentSceneName} with {shotCount} shots");
         }
     }
@@ -134,6 +131,7 @@ public class WinScreenUI : MonoBehaviour
     {
         if (levelCompleteText != null)
         {
+            string currentSceneName = SceneManager.GetActiveScene().name;
             levelCompleteText.text = $"{currentSceneName} Complete!";
         }
     }
@@ -178,6 +176,7 @@ public class WinScreenUI : MonoBehaviour
     
     private void AutoDetectNextLevel()
     {
+        string currentSceneName = SceneManager.GetActiveScene().name;
         if (currentSceneName.StartsWith("Level"))
         {
             string numberPart = currentSceneName.Substring(5);
