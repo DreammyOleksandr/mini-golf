@@ -120,10 +120,39 @@ public class WinScreenUI : MonoBehaviour
         // Try to get actual shot count from ShotsCounter
         if (ShotsCounter.Instance != null)
         {
-            return ShotsCounter.Instance.CurrentShots;
+            int lastCompletedShots = ShotsCounter.Instance.LastCompletedLevelShots;
+            int currentShots = ShotsCounter.Instance.CurrentShots;
+            
+            if (showDebugInfo)
+            {
+                Debug.Log($"WinScreenUI: LastCompletedLevelShots: {lastCompletedShots}, CurrentShots: {currentShots}");
+            }
+            
+            // If LastCompletedLevelShots is 0, use CurrentShots as it contains the actual shot count
+            // This handles the case where WinScreenUI runs before ShotsCounter in the event chain
+            if (lastCompletedShots > 0)
+            {
+                if (showDebugInfo)
+                {
+                    Debug.Log($"WinScreenUI: Using LastCompletedLevelShots: {lastCompletedShots}");
+                }
+                return lastCompletedShots;
+            }
+            else
+            {
+                if (showDebugInfo)
+                {
+                    Debug.Log($"WinScreenUI: LastCompletedLevelShots was 0, using CurrentShots as fallback: {currentShots}");
+                }
+                return currentShots; // Use current shots regardless of whether it's > 0
+            }
         }
         
         // Fallback to static value for testing
+        if (showDebugInfo)
+        {
+            Debug.Log("WinScreenUI: ShotsCounter.Instance is null or all values are 0, using fallback value 5");
+        }
         return 5;
     }
     
@@ -132,8 +161,20 @@ public class WinScreenUI : MonoBehaviour
         if (levelCompleteText != null)
         {
             string currentSceneName = SceneManager.GetActiveScene().name;
-            levelCompleteText.text = $"{currentSceneName} Complete!";
+            string formattedLevelName = FormatLevelName(currentSceneName);
+            levelCompleteText.text = $"{formattedLevelName} Complete!";
         }
+    }
+    
+    private string FormatLevelName(string sceneName)
+    {
+        // Convert "Level1" to "Level 1", "Level2" to "Level 2", etc.
+        if (sceneName.StartsWith("Level") && sceneName.Length > 5)
+        {
+            string numberPart = sceneName.Substring(5);
+            return $"Level {numberPart}";
+        }
+        return sceneName;
     }
     
     private void UpdateShotsText(int shotCount)

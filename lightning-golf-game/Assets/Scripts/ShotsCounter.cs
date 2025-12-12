@@ -5,12 +5,13 @@ public class ShotsCounter : MonoBehaviour
 {
     [Header("Settings")]
     public bool resetOnLevelComplete = true;
-    public bool showDebugInfo = false;
+    public bool showDebugInfo = true;
 
     public static event Action<int> OnShotCountChanged;
     public static event Action OnCounterReset;
 
     private int currentShots = 0;
+    private int lastCompletedLevelShots = 0;
     private static ShotsCounter instance;
 
     public static ShotsCounter Instance
@@ -31,6 +32,7 @@ public class ShotsCounter : MonoBehaviour
     }
 
     public int CurrentShots => currentShots;
+    public int LastCompletedLevelShots => lastCompletedLevelShots;
 
     void Awake()
     {
@@ -49,6 +51,10 @@ public class ShotsCounter : MonoBehaviour
     void OnEnable()
     {
         HoleTrigger.OnLevelCompleted += HandleLevelCompleted;
+        if (showDebugInfo)
+        {
+            Debug.Log("ShotsCounter: Subscribed to HoleTrigger.OnLevelCompleted event");
+        }
     }
 
     void OnDisable()
@@ -81,14 +87,21 @@ public class ShotsCounter : MonoBehaviour
 
     private void HandleLevelCompleted()
     {
+        // Store the shot count before resetting
+        lastCompletedLevelShots = currentShots;
+        
         if (showDebugInfo)
         {
-            Debug.Log($"Level completed with {currentShots} shots!");
+            Debug.Log($"Level completed with {currentShots} shots! Stored in lastCompletedLevelShots: {lastCompletedLevelShots}");
         }
 
         if (resetOnLevelComplete)
         {
             ResetCounter();
+            if (showDebugInfo)
+            {
+                Debug.Log($"Counter reset. CurrentShots: {currentShots}, LastCompletedLevelShots: {lastCompletedLevelShots}");
+            }
         }
     }
 
