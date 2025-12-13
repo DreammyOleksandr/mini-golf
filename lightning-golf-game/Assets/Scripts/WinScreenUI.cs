@@ -163,6 +163,11 @@ public class WinScreenUI : MonoBehaviour
             string currentSceneName = SceneManager.GetActiveScene().name;
             string formattedLevelName = FormatLevelName(currentSceneName);
             levelCompleteText.text = $"{formattedLevelName} Complete!";
+            
+            if (showDebugInfo)
+            {
+                Debug.Log($"WinScreenUI: Scene name: '{currentSceneName}' -> Formatted: '{formattedLevelName}'");
+            }
         }
     }
     
